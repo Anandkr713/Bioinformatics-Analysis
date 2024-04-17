@@ -1,0 +1,96 @@
+---
+title: "ALL analysis and p-values with different statistical tests"
+output: html_document
+date: "2023-03-07"
+output:
+  word_document: default
+  html_document: default
+---
+
+Install BioCManager and the ALL package
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+A data frame containing the expression values for the B-cell ALL patients in stage B, B1, B2, B3, B4 from the ALL data created. 
+
+```{r}
+library(ALL)
+data(ALL)
+ALL.bcell<-ALL[,ALL$BT %in% c("B","B1","B2","B3","B4")]
+ALL.bcell
+```
+
+Number of patients per group
+
+```{r}
+table(ALL.bcell$BT)
+```
+
+Shapiro test to test normality and p-values collected, 
+
+```{r}
+ALL.sw.pvalues<-apply(exprs(ALL.bcell),1,function(x) shapiro.test(residuals(lm(x~ALL.bcell$BT)))$p.value)
+head(ALL.sw.pvalues)
+```
+
+Homoscedasticity assumption performed
+
+```{r}
+library(lmtest)
+ALL.bp.pvalues<-apply(exprs(ALL.bcell),1,function(x) as.numeric(bptest(lm(x~ALL.bcell$BT),studentize=FALSE)$p.value))
+head(ALL.bp.pvalues)
+```
+
+Counts for each and both 
+
+
+```{r}
+sum(ALL.sw.pvalues>0.05)
+```
+
+```{r}
+sum(ALL.bp.pvalues>0.05)
+```
+
+```{r}
+sum(ALL.sw.pvalues>0.05 & ALL.bp.pvalues>0.05)
+```
+p-values from ANOVA collected
+```{r}
+ALL.anova.pvalues<-apply(exprs(ALL.bcell),1,function(x) anova(lm(x~ALL.bcell$BT))$Pr[1])
+head(ALL.anova.pvalues)
+```
+
+ANOVA p-values less than 0.000001 
+
+```{r}
+featureNames(ALL.bcell)[ALL.anova.pvalues<0.00001]
+```
+
+Kruskal wallis p-values collected
+
+```{r}
+ALL.kw.pvalues<-apply(exprs(ALL.bcell),1,function(x) kruskal.test(x~ALL.bcell$BT)$p.value)
+head(ALL.kw.pvalues)
+```
+
+Kw p values less than 0.000001 
+
+```{r}
+featureNames(ALL.bcell)[ALL.kw.pvalues<0.000001]
+```
+
+Comparing ANOVA and KW p-values to less than 0.001
+
+```{r}
+small.anova<-ALL.anova.pvalues<0.001
+small.kw<-ALL.kw.pvalues<0.001
+table(small.anova,small.kw)
+```
+291 genes have pvalue smaller than 0.001 for both ANOVA and Kruskal-Wallis.
+
+124 genes have pvalue smaller than 0.001 for ANOVA.
+
+38 genes have pvalue smaller than 0.001 for Kruskal-Wallis.
