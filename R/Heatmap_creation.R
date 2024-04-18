@@ -15,7 +15,7 @@ colnames(csv_mat) <- c('label1', 'label2')
 
 # Create a heatmap
 #heatmap(csv_mat, Rowv = NA, Colv = NA, margins = c(10, 10), main = "Heatmap title")
-cav_melt <- melt(csv_df[,-1])
+csv_melt <- melt(csv_df[,-1])
 X2 <- c('label1','label2')
 ggp1 <- ggplot(csv_melt, aes(Name , variable)) +
   geom_tile(aes(fill = value))+
