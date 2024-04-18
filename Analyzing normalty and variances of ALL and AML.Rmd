@@ -1,0 +1,46 @@
+---
+title: "Analyzing variances and noramity of ALL and AML"
+output: html_document
+date: "2023-02-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("multtest")
+```
+
+```{r}
+library(multtest)
+
+```
+Normalty of ALL and AML expressions tested
+```{r}
+data(golub)
+ccd3<- agrep("^CD33", golub.gnames[,2])
+golubFactor <- factor(golub.cl, levels = 0:1, labels = c("ALL","AML"))
+shapiro.test(golub[ccd3,golubFactor == "ALL"])
+```
+
+```{r}
+shapiro.test(golub[ccd3,golubFactor == "AML"])
+```
+They are noramlly distributed.
+
+Variances tested
+```{r}
+var.test(golub[ccd3,]~golubFactor)
+```
+variances almost equal
+
+means tested
+```{r}
+t.test(golub[ccd3,]~golubFactor,var.equal = TRUE)
+```
+means are not equal
