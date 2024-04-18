@@ -21,7 +21,7 @@ ggp1 <- ggplot(csv_melt, aes(Name , variable)) +
   geom_tile(aes(fill = value))+
   scale_fill_gradient(low = "white", high = "red")+
   coord_flip()+
-  labs(y = "Day and UV type", x = "Genes")+
+  labs(y = "pltlabels_y_axis", x = "pltlabel_x_axis")+
   ggtitle("output_file_name")
 
 ggp1
