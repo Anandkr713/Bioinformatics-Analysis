@@ -1,0 +1,46 @@
+---
+title: "k means clustering ans zyxin"
+output: html_document
+date: "2023-03-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+scatterplot for AML/ALL
+```{r}
+library(BiocGenerics)
+data(golub)
+golubFactor <- factor(golub.cl, levels = 0:1, labels = c("ALL", "AML"))
+plot(golub[2124,], pch= as.numeric(golubFactor))
+```
+Dendogram
+```{r}
+zyxin<-data.frame(golub[2124,])
+plot(hclust(dist(zyxin),method= "single"))
+```
+K means clustering k=2
+```{r}
+zyxin.km<-kmeans(zyxin,2,nstart=20)
+zyxin.mean<-
+as.matrix(tapply(golub[2124,],golubFactor,mean),nrow=2,ncol=1,byrow=TRUE)
+zyxin.km2<-kmeans(zyxin,zyxin.mean,nstart=20)
+plot(golub[2124,],col=(zyxin.km$cluster+1),main ="K means ckustering with
+K=2",xlab="", ylab="",pch=20,cex=2)
+```
+Bootstrap clustering
+```{r}
+initial <- as.matrix(tapply(golub[2124,],golubFactor,mean),nrow =2, ncol =1,
+byrow=TRUE)
+library(boot)
+n<-38
+nboot<-1000
+boot.zyxin.km<-matrix(0,nrow=nboot,ncol=2)
+for(i in 1:nboot){
+dat.star<-zyxin[sample(1:n,replace=TRUE),]
+zyxin.km3<-kmeans(dat.star,initial, nstart=10)
+boot.zyxin.km[i,]<-c(zyxin.km3$centers[1,],zyxin.km3$centers[2,])
+}
+quantile(boot.zyxin.km[,1],c(0.025,0.975))
+```
+
